@@ -24,26 +24,18 @@ class Chat implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        // Decode the incoming JSON message
         $data = json_decode($msg, true);
 
-        // Validate the JSON data
         if (json_last_error() === JSON_ERROR_NONE && isset($data['username']) && isset($data['message'])) {
             $message = htmlspecialchars($data['message']);
             $username = htmlspecialchars($data['username']);
 
             echo "Received message: " . $msg . PHP_EOL;
 
-            // Broadcast the message to all clients
             foreach ($this->clients as $client) {
-                if ($from !== $client) {
-                    // Send the message to all clients except the sender
-                    $client->send(json_encode(['username' => $username, 'message' => $message]));
-                }
+                $client->send(json_encode(['username' => $username, 'message' => $message]));
             }
 
-            // Optionally send the message back to the sender
-            $from->send(json_encode(['username' => $username, 'message' => $message]));
         } else {
             echo "Invalid JSON or missing fields: $msg\n";
         }
@@ -69,9 +61,9 @@ $server = IoServer::factory(
             new Chat()
         )
     ),
-    8082,  // Ensure this matches the port in your client code
-    '10.212.101.13'  // Bind to localhost
+    8082,
+    '10.0.0.229'
 );
 
-echo "WebSocket server started at wss://10.212.101.13:8082\n";
+echo "WebSocket server started at ws://10.0.0.229:8082\n";
 $server->run();

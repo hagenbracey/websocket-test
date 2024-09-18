@@ -23,13 +23,19 @@ $username = htmlspecialchars($_SESSION["username"]);
     </form>
 
     <head>
-        <title>Chat Application</title>
         <style>
             #chat {
+                margin-top: 12px;
                 height: 300px;
                 border: 1px solid #ccc;
                 overflow-y: scroll;
                 margin-bottom: 10px;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+            }
+
+            #chat div {
+                margin-bottom: 5px;
             }
 
             #message {
@@ -79,18 +85,16 @@ $username = htmlspecialchars($_SESSION["username"]);
             }
 
 
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize WebSocket
-                var ws = new WebSocket('ws://10.212.101.13:8082'); // Change to your WebSocket URL
+            document.addEventListener('DOMContentLoaded', function () {
+                var ws = new WebSocket('ws://10.0.0.229:8082');
 
-                // Username should be set somewhere in your application
-                var username = '<?php echo $username ?>'; // You might get this from PHP or elsewhere
+                var username = '<?php echo $username ?>';
 
-                ws.onopen = function() {
+                ws.onopen = function () {
                     console.log('WebSocket connection opened.');
                 };
 
-                ws.onmessage = function(event) {
+                ws.onmessage = function (event) {
                     try {
                         var data = JSON.parse(event.data);
                         var chat = document.getElementById('chat');
@@ -108,15 +112,14 @@ $username = htmlspecialchars($_SESSION["username"]);
                     }
                 };
 
-                ws.onerror = function(error) {
+                ws.onerror = function (error) {
                     console.error('WebSocket Error:', error);
                 };
 
-                ws.onclose = function(event) {
+                ws.onclose = function (event) {
                     console.log('WebSocket connection closed:', event);
                 };
 
-                // Function to send a message
                 function sendMessage() {
                     var messageInput = document.getElementById('message');
                     var message = messageInput.value;
@@ -128,7 +131,7 @@ $username = htmlspecialchars($_SESSION["username"]);
                                     message: message
                                 });
                                 ws.send(messageData);
-                                messageInput.value = ''; // Clear the input field
+                                messageInput.value = '';
                             } catch (e) {
                                 console.error('Failed to send message:', e);
                             }
@@ -138,15 +141,13 @@ $username = htmlspecialchars($_SESSION["username"]);
                     }
                 }
 
-                // Handle the click event on the send button
-                document.getElementById('send').onclick = function() {
+                document.getElementById('send').onclick = function () {
                     sendMessage();
                 };
 
-                // Handle pressing Enter to send a message
-                document.getElementById('message').addEventListener('keydown', function(event) {
+                document.getElementById('message').addEventListener('keydown', function (event) {
                     if (event.key === 'Enter') {
-                        event.preventDefault(); // Prevent the default Enter key behavior (e.g., form submission)
+                        event.preventDefault();
                         sendMessage();
                     }
                 });
