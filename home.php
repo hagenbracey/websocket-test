@@ -55,6 +55,8 @@ $username = htmlspecialchars($_SESSION["username"]);
         <button id="send">Send</button>
 
         <script>
+            var timeouts = 0;
+
             // Function to get a color based on the username
             function getColor(username) {
                 // Define a color palette
@@ -84,46 +86,54 @@ $username = htmlspecialchars($_SESSION["username"]);
                 return colors[hashString(username)];
             }
 
-
-            document.addEventListener('DOMContentLoaded', function () {
-                var ws = new WebSocket('ws://10.0.0.229:8082');
-
+            document.addEventListener('DOMContentLoaded', function() {
+                var ws;
                 var username = '<?php echo $username ?>';
 
-                ws.onopen = function () {
-                    console.log('WebSocket connection opened.');
-                };
+                function connect() {
+                    ws = new WebSocket('ws://10.212.100.162:8082');
 
-                ws.onmessage = function (event) {
-                    try {
-                        var data = JSON.parse(event.data);
-                        var chat = document.getElementById('chat');
-                        if (chat) {
-                            var newMessage = document.createElement('div');
-                            var color = getColor(data.username);
-                            newMessage.innerHTML = `<span style="color:${color};">${data.username}:</span> ${data.message}`;
-                            chat.appendChild(newMessage);
-                            chat.scrollTop = chat.scrollHeight;
-                        } else {
-                            console.error('Chat element not found.');
+                    ws.onopen = function() {
+                        console.log('WebSocket connection opened.');
+                        timeouts = 0;
+                    };
+
+                    ws.onmessage = function(event) {
+                        try {
+                            var data = JSON.parse(event.data);
+                            var chat = document.getElementById('chat');
+                            if (chat) {
+                                var newMessage = document.createElement('div');
+                                var color = getColor(data.username);
+                                newMessage.innerHTML = `<span style="color:${color};">${data.username}:</span> ${data.message}`;
+                                chat.appendChild(newMessage);
+                                chat.scrollTop = chat.scrollHeight;
+                            } else {
+                                console.error('Chat element not found.');
+                            }
+                        } catch (e) {
+                            console.error('Failed to process message:', e);
                         }
-                    } catch (e) {
-                        console.error('Failed to process message:', e);
-                    }
-                };
+                    };
 
-                ws.onerror = function (error) {
-                    console.error('WebSocket Error:', error);
-                };
+                    ws.onerror = function(error) {
+                        console.error('WebSocket Error:', error);
+                    };
 
-                ws.onclose = function (event) {
-                    console.log('WebSocket connection closed:', event);
-                };
+                    ws.onclose = function(event) {
+                        console.log('WebSocket connection closed. Trying to reconnect...', event);
+                        setTimeout(function() {
+                            connect();
+                        }, 1000 * timeouts)
+                    };
+                    timeouts++;
+                }
 
                 function sendMessage() {
                     var messageInput = document.getElementById('message');
                     var message = messageInput.value;
                     if (message.trim()) {
+                        message = message.substr(0, 250);
                         if (ws.readyState === WebSocket.OPEN) {
                             try {
                                 var messageData = JSON.stringify({
@@ -141,18 +151,21 @@ $username = htmlspecialchars($_SESSION["username"]);
                     }
                 }
 
-                document.getElementById('send').onclick = function () {
+                document.getElementById('send').onclick = function() {
                     sendMessage();
                 };
 
-                document.getElementById('message').addEventListener('keydown', function (event) {
+                document.getElementById('message').addEventListener('keydown', function(event) {
                     if (event.key === 'Enter') {
                         event.preventDefault();
                         sendMessage();
                     }
                 });
+
+                connect();
             });
         </script>
+
     </body>
 
     </html>

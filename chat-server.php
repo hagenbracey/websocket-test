@@ -35,7 +35,6 @@ class Chat implements MessageComponentInterface
             foreach ($this->clients as $client) {
                 $client->send(json_encode(['username' => $username, 'message' => $message]));
             }
-
         } else {
             echo "Invalid JSON or missing fields: $msg\n";
         }
@@ -62,8 +61,8 @@ $server = IoServer::factory(
         )
     ),
     8082,
-    '10.0.0.229'
+    '10.212.100.162'
 );
 
-echo "WebSocket server started at ws://10.0.0.229:8082\n";
+echo "WebSocket server started at ws://10.212.100.162:8082\n";
 $server->run();
