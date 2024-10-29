@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
 
         <?php if (isset($_SESSION['message'])): ?>
-        <div class="notification is-info">
-            <p><?php echo htmlspecialchars($_SESSION['message']); ?></p>
-            <?php unset($_SESSION['message']);
+            <div class="notification is-info">
+                <p><?php echo htmlspecialchars($_SESSION['message']); ?></p>
+                <?php unset($_SESSION['message']);
                 ?>
-        </div>
+            </div>
         <?php endif; ?>
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
